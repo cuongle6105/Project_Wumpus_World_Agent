@@ -60,8 +60,21 @@ class Environment:
     def get_percepts(self):
         x, y = self.agent_pos
         cell = self.grid[x][y]
-        return {
-            "breeze": cell.breeze,
-            "stench": cell.stench,
-            "glitter": cell.glitter,
-        }
+        percepts = set()
+        if cell.breeze:
+            percepts.add('B')
+        if cell.glitter:
+            percepts.add('G')
+        if cell.stench:
+            percepts.add('S')
+        
+        return percepts
+    
+    def adjacent(self, i, j):
+        dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+        result = []
+        for dx, dy in dirs:
+            ni, nj = i + dx, j + dy
+            if 0 <= ni < self.size and 0 <= nj < self.size:
+                result.append((ni, nj))
+        return result

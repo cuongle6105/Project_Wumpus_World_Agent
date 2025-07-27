@@ -4,6 +4,7 @@ import sys
 from environment import Environment
 from agent import Agent
 from visualizer import Visualizer
+from inference import InferenceEngine
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
@@ -44,11 +45,11 @@ def draw_percepts_table(surface, x, y, percepts):
     cell_label = font.render("Cell: ({}, {})".format(*agent.position), True, (0, 0, 0))
     surface.blit(cell_label, (x + 10, y + 10))
     percept_text = []
-    if percepts["breeze"]:
+    if "B" in percepts:
         percept_text.append("breeze")
-    if percepts["stench"]:
+    if  "S" in percepts:
         percept_text.append("stench")
-    if percepts["glitter"]:
+    if  "G" in percepts:
         percept_text.append("grab treasure")
     percept_str = ", ".join(percept_text) if percept_text else "none"
     percept_label = small_font.render("Percepts: " + percept_str, True, (0, 0, 0))
@@ -96,6 +97,8 @@ paused = False
 score = 0
 step_count = 0
 game_over = False
+ie: InferenceEngine = InferenceEngine()
+
 reset_game()
 
 while True:
@@ -186,15 +189,23 @@ while True:
     if auto_play and not paused:
         score -= 1
         step_count += 1
-        if percepts["glitter"]:
+        if 'G' in percepts:
             if agent.grab(env):
                 score += 10
+        
         # agent.move_forward(env)
         # agent.turn_left()
         vis.fire_arrow()
         
         env.agent_pos = agent.position
         percepts = env.get_percepts()
+        #inference engine to deduce neighboring cells are safe or not
+        ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
+        
+        for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
+            print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
+        ie.kb.show()
+        ie.printUncertains()
         
         x, y = agent.position
         cell = env.grid[x][y]
