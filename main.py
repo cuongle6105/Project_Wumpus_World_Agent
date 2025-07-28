@@ -214,7 +214,6 @@ while True:
         for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
             print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
         ie.kb.show()
-        ie.printUncertains()
         
         x, y = agent.position
         cell = env.grid[x][y]

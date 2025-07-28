@@ -34,30 +34,28 @@ class KnowledgeBase:
             changed = False
             remaining = []
             for r in self.rules:
-                if r.triggered(self.facts) or r.triggered(self.neg_facts):
+                if r.triggered(self.facts):
                     if r.conclusion not in self.facts:
                         self.add_fact(r.conclusion)
                         changed = True
                 else:
                     remaining.append(r)
             self.rules = remaining
-            
-    def show(self):
-        print("facts: ", self.facts)
-        print("negate facts:", self.neg_facts)
 
 class InferenceEngine:
-    def __init__(self):
+    def __init__(self, world):
+        self.world = world
         self.kb = KnowledgeBase()
 
-
-    def process_percepts(self, x, y, percepts, world):
+    def infer(self, query: Tuple[int,int]) -> str:
+        x, y = query
+        percepts = self.world.set_agent(x, y)
         cell = f"{x}{y}"
 
         self.kb.add_fact(f"Safe{cell}")
         self.kb.add_fact(f"-W{cell}")
         self.kb.add_fact(f"-P{cell}")
-        neigh = [f"{i}{j}" for i,j in world.adjacent(x,y)]
+        neigh = [f"{i}{j}" for i,j in self.world.adjacent(x,y)]
 
         if 'S' in percepts:
             self.kb.add_fact(f"S{cell}")
@@ -68,6 +66,7 @@ class InferenceEngine:
             for n in neigh:
                 self.kb.add_fact(f"-W{n}")
                 
+        # Breeze handling
         if 'B' in percepts:
             self.kb.add_fact(f"B{cell}")
             for n in neigh:
@@ -76,11 +75,10 @@ class InferenceEngine:
         else:
             for n in neigh:
                 self.kb.add_fact(f"-P{n}")
-        
-    def infer(self, query: Tuple[int,int]) -> str:
+
         self.kb.infer()
 
-        tag = f"{query[0]}{query[1]}"
+        tag = f"{x}{y}"
         if f"W{tag}" in self.kb.facts or f"P{tag}" in self.kb.facts:
             return 'unsafe'
 
