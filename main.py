@@ -5,6 +5,7 @@ from environment import Environment
 from agent import Agent
 from visualizer import Visualizer
 from inference import InferenceEngine
+from planning import make_next_action
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
@@ -202,6 +203,14 @@ while True:
         #inference engine to deduce neighboring cells are safe or not
         ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
         
+        actions = []
+        make_next_action(agent, ie, env, actions)
+        
+        for action in actions:
+            print("Action taken:", action)
+        
+        print("Arrows left:", agent.arrows)
+
         for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
             print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
         ie.kb.show()
