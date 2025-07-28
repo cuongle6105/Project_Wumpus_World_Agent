@@ -69,7 +69,7 @@ class Visualizer:
                 # Check for wumpus hit
                 cell = self.env.grid[x][y]
                 if cell.has_wumpus:
-                    cell.has_wumpus = False
+                    # cell.has_wumpus = False
                     self.shot_arrow = None
                     return  # Skip moving the arrow further
 

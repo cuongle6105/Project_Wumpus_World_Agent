@@ -26,6 +26,8 @@ class Environment:
         self.place_pits()
         self.place_wumpuses()
         self.place_gold()
+        self.remaining_wumpuses = self.num_wumpus  # Track remaining Wumpuses
+
 
     def place_pits(self):
         for x in range(self.size):

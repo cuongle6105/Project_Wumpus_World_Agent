@@ -6,6 +6,36 @@ class Agent:
         self.direction = "E"
         self.has_gold = False
         self.actions = []
+        self.arrows = 1
+    
+    def reset(self):
+        self.position = [0, 0]
+        self.direction = "E"
+        self.has_gold = False
+        self.actions = []
+        self.arrows = 1
+
+    def shoot_arrow(self, env):
+        if self.arrows <= 0:
+            return False  # No arrows left
+        self.arrows -= 1
+        x, y = self.position
+        direction = self.direction
+
+        dx, dy = {"N": (0, 1), "E": (1, 0), "S": (0, -1), "W": (-1, 0)}[direction]
+        x += dx
+        y += dy
+
+        while in_bounds(x, y, env.size):
+            cell = env.grid[x][y]
+            if cell.has_wumpus:
+                cell.has_wumpus = False
+                env.remaining_wumpuses -= 1  # Update count in environment
+                return True  # Wumpus killed
+            x += dx
+            y += dy
+        return False  # Arrow missed
+
 
     def move_forward(self, env):
         dx, dy = {"N": (0, 1), "E": (1, 0), "S": (0, -1), "W": (-1, 0)}[self.direction]

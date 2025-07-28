@@ -195,7 +195,7 @@ while True:
         
         # agent.move_forward(env)
         # agent.turn_left()
-        vis.fire_arrow()
+        # vis.fire_arrow()
         
         env.agent_pos = agent.position
         percepts = env.get_percepts()
