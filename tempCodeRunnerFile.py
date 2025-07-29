@@ -82,8 +82,7 @@ def draw_inputs(surface, panel_left):
 
 
 def reset_game():
-    global env, agent, vis, score, step_count, percepts, ie
-    ie = InferenceEngine()
+    global env, agent, vis, score, step_count, percepts
     env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
@@ -99,7 +98,7 @@ paused = False
 score = 0
 step_count = 0
 game_over = False
-
+ie: InferenceEngine = InferenceEngine()
 
 reset_game()
 
