@@ -188,39 +188,64 @@ while True:
                 input_texts[active_input] += event.unicode
 
     if auto_play and not paused:
+        # Penalize for each step taken
         score -= 1
         step_count += 1
-        if 'G' in percepts:
-            if agent.grab(env):
-                score += 10
-        
-        # agent.move_forward(env)
-        # agent.turn_left()
-        # vis.fire_arrow()
-        
+
+        # Update environment and let the inference engine process new information
         env.agent_pos = agent.position
-        percepts = env.get_percepts()
-        #inference engine to deduce neighboring cells are safe or not
         ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
         
+        # Ask the planning module for the next best actions
         actions = []
         make_next_action(agent, ie, env, actions)
         
+        # Execute the planned actions
         for action in actions:
-            print("Action taken:", action)
-        
-        print("Arrows left:", agent.arrows)
+            print(f"Step {step_count}: Agent action: {action}")
+            if action == "GRAB":
+                if agent.grab(env):
+                    score += 1000  # Reward for getting the gold
+            elif action == "CLIMB":
+                if agent.climb(env):
+                    game_over = True
+                    # Set win/loss message based on whether the agent has the gold
+                    if agent.has_gold:
+                        win_message = "You win! Escaped with the gold!"
+                        score += 1000
+                    else:
+                        win_message = "You lose. You escaped without the gold."
 
-        for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
-            print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
-        ie.kb.show()
-        
-        x, y = agent.position
-        cell = env.grid[x][y]
-        if cell.has_pit or cell.has_wumpus:
-           game_over = True
-           auto_play = False
-           paused = True
+        # After the agent acts, check if it has landed in a dangerous cell
+        if not game_over:
+            x, y = agent.position
+            cell = env.grid[x][y]
+            if cell.has_pit or cell.has_wumpus:
+                score -= 1000  # Penalty for death
+                game_over = True
+                win_message = "You lose! Fell into a pit or met a Wumpus."
+
+        # --- Advanced Setting: Moving Wumpus ---
+        # If the game is not over and the advanced setting is on, move the Wumpus every 5 steps
+        if not game_over and advanced_setting and step_count > 0 and step_count % 5 == 0:
+            print(f"--- Wumpuses are moving (end of step {step_count}) ---")
+            env.move_wumpuses()
+            ie.reset_wumpus_knowledge()  # Agent's knowledge of Wumpus locations is now outdated
+            
+            # Check if a Wumpus moved into the agent's cell
+            x, y = agent.position
+            if env.grid[x][y].has_wumpus:
+                score -= 1000
+                game_over = True
+                win_message = "You lose! A Wumpus moved on top of you!"
+
+        # If the game is still running, get the new percepts for the next turn
+        if not game_over:
+            percepts = env.get_percepts()
+        else:
+            # If the game is over, stop the auto-play
+            auto_play = False
+            paused = True
 
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))

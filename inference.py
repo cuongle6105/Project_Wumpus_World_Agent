@@ -13,6 +13,13 @@ class KnowledgeBase:
         self.facts: Set[str] = set()
         self.neg_facts: Set[str] = set()
         self.rules: List[Rule] = []
+    
+    def reset_wumpus_knowledge(self):
+        # """ Removes all facts and rules related to Wumpus locations. """
+        self.kb.facts = {f for f in self.kb.facts if not f.startswith('W')}
+        self.kb.neg_facts = {f for f in self.kb.neg_facts if not f.startswith('W')}
+        self.kb.rules = [r for r in self.kb.rules if not r.conclusion.startswith('W')]
+
 
     def add_fact(self, fact: str):
         if fact.startswith('-'):
