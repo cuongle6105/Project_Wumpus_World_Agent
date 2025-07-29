@@ -82,7 +82,7 @@ def draw_inputs(surface, panel_left):
 
 
 def reset_game():
-    global env, agent, vis, score, step_count, percepts
+    global env, agent, vis, score, step_count, percepts, game_over
     env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
@@ -91,6 +91,7 @@ def reset_game():
     score = 0
     step_count = 0
     percepts = env.get_percepts()
+    game_over = False
 
 # Initial setup
 auto_play = False
@@ -202,7 +203,7 @@ while True:
         
         # Execute the planned actions
         for action in actions:
-            print(f"Step {step_count}: Agent action: {action}")
+            print(f"Step {step_count}: Agent action: {action} advanced={advanced_setting} game_over={game_over} has_gold={agent.has_gold} cell has gold={env.grid[agent.position[0]][agent.position[1]].has_gold}")
             if action == "GRAB":
                 if agent.grab(env):
                     score += 1000  # Reward for getting the gold
@@ -231,7 +232,7 @@ while True:
             print(f"--- Wumpuses are moving (end of step {step_count}) ---")
             env.move_wumpuses()
             ie.reset_wumpus_knowledge()  # Agent's knowledge of Wumpus locations is now outdated
-            
+            # ie.kb.reset_wumpus_knowledge()  # Reset Wumpus knowledge in the inference engine
             # Check if a Wumpus moved into the agent's cell
             x, y = agent.position
             if env.grid[x][y].has_wumpus:
@@ -246,6 +247,9 @@ while True:
             # If the game is over, stop the auto-play
             auto_play = False
             paused = True
+        
+        paused = True # Pause after each action in auto-play mode
+            
 
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))

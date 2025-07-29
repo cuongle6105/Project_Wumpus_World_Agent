@@ -63,6 +63,7 @@ class Agent:
         if env.grid[x][y].has_gold:
             self.has_gold = True
             env.grid[x][y].has_gold = False
+            env.grid[x][y].glitter = False
             return True
         return False
     

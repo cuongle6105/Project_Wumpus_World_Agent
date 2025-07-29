@@ -68,6 +68,7 @@ class Environment:
             x, y = random.randint(0, self.size-1), random.randint(0, self.size-1)
             if (x, y) != (0, 0) and not self.grid[x][y].has_pit and not self.grid[x][y].has_wumpus:
                 self.grid[x][y].has_wumpus = True
+                self.wumpus_positions.append([x, y]) # Add position to our list
                 for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
                     nx, ny = x + dx, y + dy
                     if in_bounds(nx, ny, self.size):
@@ -85,26 +86,26 @@ class Environment:
     def move_wumpuses(self):
         # """ Moves each wumpus to a valid random adjacent cell. """
         new_positions = []
-        # Create a set of tuple-representations for quick lookups
-        current_wumpus_tuples = {tuple(pos) for pos in self.wumpus_positions}
+        occupied = {tuple(pos) for pos in self.wumpus_positions}
 
         for x, y in self.wumpus_positions:
             self.grid[x][y].has_wumpus = False
             
-            valid_moves = [[x, y]] # Wumpus can stay in place
+            valid_moves = [[x, y]]
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 nx, ny = x + dx, y + dy
-                if in_bounds(nx, ny, self.size) and not self.grid[nx][ny].has_pit and (nx, ny) not in current_wumpus_tuples:
+                if in_bounds(nx, ny, self.size) and not self.grid[nx][ny].has_pit and (nx, ny) not in occupied:
                     valid_moves.append([nx, ny])
             
             new_pos = random.choice(valid_moves)
             new_positions.append(new_pos)
+            occupied.add(tuple(new_pos))  # prevent collisions
         
         self.wumpus_positions = new_positions
         for x, y in self.wumpus_positions:
             self.grid[x][y].has_wumpus = True
             
-        self._update_percepts() # Recalculate stenches
+        self.update_percepts() # Recalculate stenches
 
     def get_percepts(self):
         x, y = self.agent_pos

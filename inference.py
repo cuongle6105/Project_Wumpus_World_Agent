@@ -13,12 +13,6 @@ class KnowledgeBase:
         self.facts: Set[str] = set()
         self.neg_facts: Set[str] = set()
         self.rules: List[Rule] = []
-    
-    def reset_wumpus_knowledge(self):
-        # """ Removes all facts and rules related to Wumpus locations. """
-        self.kb.facts = {f for f in self.kb.facts if not f.startswith('W')}
-        self.kb.neg_facts = {f for f in self.kb.neg_facts if not f.startswith('W')}
-        self.kb.rules = [r for r in self.kb.rules if not r.conclusion.startswith('W')]
 
 
     def add_fact(self, fact: str):
@@ -39,12 +33,15 @@ class KnowledgeBase:
         changed = True
         while changed:
             changed = False
+            all_facts = self.facts | {f"-" + f for f in self.neg_facts}
             remaining = []
             for r in self.rules:
-                if r.triggered(self.facts) or r.triggered(self.neg_facts):
-                    if r.conclusion not in self.facts:
+                if r.triggered(all_facts):
+                    if r.conclusion.startswith('-'):
                         self.add_fact(r.conclusion)
-                        changed = True
+                    else:
+                        self.add_fact(r.conclusion)
+                    changed = True
                 else:
                     remaining.append(r)
             self.rules = remaining
@@ -57,6 +54,11 @@ class InferenceEngine:
     def __init__(self):
         self.kb = KnowledgeBase()
 
+    def reset_wumpus_knowledge(self):
+        # """ Removes all facts and rules related to Wumpus locations. """
+        self.kb.facts = {f for f in self.kb.facts if not f.startswith('W')}
+        self.kb.neg_facts = {f for f in self.kb.neg_facts if not f.startswith('W')}
+        self.kb.rules = [r for r in self.kb.rules if not r.conclusion.startswith('W')]
 
     def process_percepts(self, x, y, percepts, world):
         cell = f"{x}{y}"
