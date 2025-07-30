@@ -203,7 +203,7 @@ while True:
         percepts = env.get_percepts()
         #inference engine to deduce neighboring cells are safe or not
         ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
-        
+        print(f"Visited status {env.agent_pos[0]}{env.agent_pos[1]}: {env.grid[env.agent_pos[0]][env.agent_pos[1]].visited}")
         actions = []
         make_next_action(agent, ie, env, actions)
         
@@ -223,6 +223,8 @@ while True:
            game_over = True
            auto_play = False
            paused = True
+        
+        paused = True
 
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))

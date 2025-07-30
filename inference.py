@@ -44,6 +44,12 @@ class InferenceEngine:
         self.kb = KnowledgeBase()
         self.uncertains = []
     
+    def reset_wumpus_knowledge(self):
+        # """ Removes all facts and rules related to Wumpus locations. """
+        self.kb.facts = {f for f in self.kb.facts if not f.startswith('W')}
+        self.kb.neg_facts = {f for f in self.kb.neg_facts if not f.startswith('W')}
+        self.kb.rules = [r for r in self.kb.rules if not r.conclusion.startswith('W')]
+    
     def infer(self, query):
         changed = True
         while changed:

@@ -4,22 +4,35 @@ import heapq
 
 def make_next_action(agent, inference, env, actions):
     x, y = agent.position
-    dir_map = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
+    # dir_map = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
+    dir_map = {(0, 1): "N", (1, 0): "E", (0, -1): "S", (-1, 0): "W"}
     dir_index = {"N": 0, "E": 1, "S": 2, "W": 3}
+    env.grid[x][y].visited = True
 
     # Estimate risk/cost for entering a cell
     def get_cell_cost(px, py):
         
         status = inference.infer([px, py])
-        print(f"Inferring cell {px}, {py} status: {status}")
+        # print(f"Inferring cell {px}, {py} status: {status}")
+        
         if status == "unsafe":
-            return float('inf')  # avoid completely
+            return float('inf')  # completely avoid
         elif status == "uncertain":
-            return 1000          # very costly (last resort)
+            return 1000  # high penalty
         elif not env.grid[px][py].visited:
-            return 2             # unvisited but safe
+            return 1  # unvisited but inferred safe
         else:
-            return 1             # visited and safe
+            return 2  # visited and safe
+    def is_adjacent_to_visited(i, j):
+        for x in range(env.size):
+            for y in range(env.size):
+                if env.grid[x][y].visited:
+                    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < env.size and 0 <= ny < env.size:
+                            if nx == i and ny == j:
+                                return True
+        return False
 
     # Dijkstra search with customizable target
     def run_dijkstra(is_target):
@@ -44,6 +57,30 @@ def make_next_action(agent, inference, env, actions):
                     if move_cost < float('inf'):
                         heapq.heappush(heap, (cost + move_cost, (nx, ny), path + [[nx, ny]]))
         return []
+    
+    def target_safe_unvisited_adjacent(i, j):
+        result = (
+            inference.infer([i, j]) == "safe" and 
+            not env.grid[i][j].visited and 
+            is_adjacent_to_visited(i, j)
+        )
+        if result:
+            print(f"Checking cell ({i}, {j}): {result}")
+        return result
+    
+    def target_uncertained_unvisited_adjacent(i, j):
+        result = (
+            inference.infer([i, j]) == "uncertain" and 
+            not env.grid[i][j].visited and 
+            is_adjacent_to_visited(i, j)
+        )
+        if result:
+            print(f"Checking cell ({i}, {j}): {result}")
+        # print(f"Checking cell ({i}, {j}): {result}")
+        return result
+    
+
+    
 
     # 1. If agent perceives gold (glitter), grab it
     if 'G' in env.get_percepts() and not agent.has_gold:
@@ -62,13 +99,17 @@ def make_next_action(agent, inference, env, actions):
 
     # 3. Otherwise, explore safe & unvisited cells
     else:
-        path = run_dijkstra(lambda i, j: inference.infer([i, j]) == "safe" and not env.grid[i][j].visited)
+        # path = run_dijkstra(lambda i, j: inference.infer([i, j]) == "safe" and not env.grid[i][j].visited)
+        path = run_dijkstra(target_safe_unvisited_adjacent)
+        print("Path found to safe unvisited adjacent cells:", path)
         if not path:
-            # 4. If nothing safe/unvisited, explore safe (even visited) to keep moving
-            path = run_dijkstra(lambda i, j: inference.infer([i, j]) == "safe")
-        if not path:
-            # 5. As last resort, explore uncertain cells that are unvisited
-            path = run_dijkstra(lambda i, j: inference.infer([i, j]) == "uncertain" and not env.grid[i][j].visited)
+            path = run_dijkstra(target_uncertained_unvisited_adjacent)
+            print("Path found to uncertain unvisited adjacent cells:", path)
+        #     # 4. If nothing safe/unvisited, explore safe (even visited) to keep moving
+        #     path = run_dijkstra(lambda i, j: inference.infer([i, j]) == "safe")
+        # if not path:
+        #     # 5. As last resort, explore uncertain cells that are unvisited
+        #     path = run_dijkstra(lambda i, j: inference.infer([i, j]) == "uncertain" and not env.grid[i][j].visited)
 
     # 6. If no path is found, agent does nothing
     if not path:

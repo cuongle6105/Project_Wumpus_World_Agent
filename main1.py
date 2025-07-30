@@ -195,6 +195,7 @@ while True:
 
         # Update environment and let the inference engine process new information
         env.agent_pos = agent.position
+        percepts = env.get_percepts()
         ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
         
         # Ask the planning module for the next best actions
