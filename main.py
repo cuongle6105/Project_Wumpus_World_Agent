@@ -82,7 +82,7 @@ def draw_inputs(surface, panel_left):
 
 
 def reset_game():
-    global env, agent, vis, score, step_count, percepts, ie
+    global env, agent, vis, score, step_count, percepts, ie, game_over, paused
     ie = InferenceEngine()
     env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     env.grid[0][0].has_pit = False
@@ -92,6 +92,8 @@ def reset_game():
     score = 0
     step_count = 0
     percepts = env.get_percepts()
+    game_over = False
+    paused = False
 
 # Initial setup
 auto_play = False
@@ -203,18 +205,18 @@ while True:
         percepts = env.get_percepts()
         #inference engine to deduce neighboring cells are safe or not
         ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
-        print(f"Visited status {env.agent_pos[0]}{env.agent_pos[1]}: {env.grid[env.agent_pos[0]][env.agent_pos[1]].visited}")
+        print(f"Step {step_count} advanced {advanced_setting} gameover {game_over} visited status {env.agent_pos[0]}{env.agent_pos[1]}: {env.grid[env.agent_pos[0]][env.agent_pos[1]].visited}")
         actions = []
         make_next_action(agent, ie, env, actions)
         
         for action in actions:
             print("Action taken:", action)
         
-        print("Arrows left:", agent.arrows)
+        # print("Arrows left:", agent.arrows)
 
-        for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
-            print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
-        ie.kb.show()
+        # for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
+        #     print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
+        # ie.kb.show()
         
         
         x, y = agent.position
@@ -223,6 +225,18 @@ while True:
            game_over = True
            auto_play = False
            paused = True
+        
+        if not game_over and advanced_setting and step_count > 0 and step_count % 5 == 0:
+            print(f"--- Wumpuses are moving (end of step {step_count}) ---")
+            env.move_wumpuses()
+            ie.reset_wumpus_knowledge()  # Agent's knowledge of Wumpus locations is now outdated
+            # ie.kb.reset_wumpus_knowledge()  # Reset Wumpus knowledge in the inference engine
+            # Check if a Wumpus moved into the agent's cell
+            x, y = agent.position
+            if env.grid[x][y].has_wumpus:
+                score -= 1000
+                game_over = True
+                win_message = "You lose! A Wumpus moved on top of you!"
         
         paused = True
 
