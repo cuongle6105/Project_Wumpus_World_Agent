@@ -62,3 +62,10 @@ class Agent:
             env.grid[x][y].has_gold = False
             return True
         return False
+    
+    def climb(self, env):
+        x, y = self.position
+        if (x, y) == (0, 0) and self.has_gold:
+            return True
+        return False
+        

@@ -91,7 +91,6 @@ def reset_game():
     step_count = 0
     game_over = False
     percepts = env.get_percepts()
-    
     reset_planner()
 
 # Initial setup
@@ -167,7 +166,7 @@ while True:
                                     WINDOW_WIDTH = CELL_SIZE * map_size + PANEL_WIDTH + 50
                                     WINDOW_HEIGHT = max(CELL_SIZE * map_size + 50, 600)
                                     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-                                    game_won = False  # Reset win flag
+                                    game_won = False
                                     reset_game()
                                     error_message = ""
                             except:
@@ -181,7 +180,7 @@ while True:
                     elif key == "restart":
                         auto_play = False
                         paused = False
-                        game_won = False  # Reset win flag
+                        game_won = False
                         reset_game()
 
         elif event.type == pygame.KEYDOWN and active_input:
@@ -192,7 +191,7 @@ while True:
             else:
                 input_texts[active_input] += event.unicode
 
-    # FIXED GAME LOOP - Only runs when game is active
+    # Only runs when game is active
     if auto_play and not paused and not game_over:
         score -= 1
         step_count += 1
@@ -211,15 +210,15 @@ while True:
         for action in actions:
             print("Action taken:", action)
             
-            # Check if game completed successfully (agent climbed out with gold)
+            # Check if game completed successfully
             if action == "climb" and agent.has_gold and tuple(agent.position) == (0, 0):
+                score += 1000
                 auto_play = False
                 game_over = True
                 game_won = True
                 break
         
         print("Arrows left:", agent.arrows)
-
         for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
             print(f"cell({di}, {dj}) is " + inference_engine.infer((di, dj)))
         inference_engine.kb.show()
@@ -247,9 +246,10 @@ while True:
     
     if game_over:
         if game_won:
-            win_surf = small_font.render("You win! Agent escaped with gold!", True, (0, 255, 0))
+            win_surf = small_font.render("You win! Agent escaped with gold!", True, (0, 200, 100))
             screen.blit(win_surf, (panel_left + 10, 460))
         else:
+            score -= 1000
             lose_surf = small_font.render("You lose!", True, (255, 0, 0))
             screen.blit(lose_surf, (panel_left + 10, 460))
 
