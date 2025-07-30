@@ -134,17 +134,19 @@ class Planner:
         if not target:
             return "turn_right"
 
-        path = self.dijkstra(pos, target, inference, env)
-        if not path or len(path) < 2:
+        if target:
+            path = self.dijkstra(pos, target, inference, env)
+            
+            if not path or len(path) < 2:
+                # Target position exists, but no path to it, find Wumpus to kill 
+                if agent.arrows > 0:
+                    kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction, desperate=True)
+                    if kill_wumpus_desperate:
+                        return kill_wumpus_desperate
+                return "turn_right"
+        else:
             return "turn_right"
-        
-        target = (0, 0) if self.returning else self.get_target(pos, inference, env)
-        if not target:
-            if agent.arrows > 0:
-                kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction, desperate=True)
-                if kill_wumpus_desperate:
-                    return kill_wumpus_desperate
-            return "turn_right"
+
 
         next_pos = path[1]
         dx = next_pos[0] - pos[0]
