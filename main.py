@@ -5,7 +5,8 @@ from environment import Environment
 from agent import Agent
 from visualizer import Visualizer
 from inference import InferenceEngine
-from advanced_planning import make_next_action
+from planning import make_next_action
+from advanced_planning import make_next_action as advanced_make_next_action
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
@@ -207,7 +208,10 @@ while True:
         ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
         print(f"Step {step_count} advanced {advanced_setting} gameover {game_over} visited status {env.agent_pos[0]}{env.agent_pos[1]}: {env.grid[env.agent_pos[0]][env.agent_pos[1]].visited}")
         actions = []
-        make_next_action(agent, ie, env, actions)
+        if advanced_setting:
+            advanced_make_next_action(agent, ie, env, actions)
+        else:
+            make_next_action(agent, ie, env, actions)
         
         for action in actions:
             print("Action taken:", action)
@@ -238,7 +242,7 @@ while True:
                 game_over = True
                 win_message = "You lose! A Wumpus moved on top of you!"
         
-        paused = True
+        # paused = True
 
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))
