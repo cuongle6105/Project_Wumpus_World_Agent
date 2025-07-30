@@ -1,12 +1,10 @@
-
 import pygame
 import sys
 from environment import Environment
 from agent import Agent
 from visualizer import Visualizer
 from inference import InferenceEngine
-from planning import make_next_action
-from advanced_planning import make_next_action as advanced_make_next_action
+from planning import make_next_action, reset_planner
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
@@ -83,8 +81,7 @@ def draw_inputs(surface, panel_left):
 
 
 def reset_game():
-    global env, agent, vis, score, step_count, percepts, ie, game_over, paused
-    ie = InferenceEngine()
+    global env, agent, vis, score, step_count, percepts, game_over
     env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
@@ -92,9 +89,11 @@ def reset_game():
     vis = Visualizer(env, agent)
     score = 0
     step_count = 0
+    game_over = False  # Reset game_over flag
     percepts = env.get_percepts()
-    game_over = False
-    paused = False
+    
+    # Reset the planner for new game
+    reset_planner()
 
 # Initial setup
 auto_play = False
@@ -102,7 +101,8 @@ paused = False
 score = 0
 step_count = 0
 game_over = False
-
+game_won = False
+inference_engine = InferenceEngine()
 
 reset_game()
 
@@ -168,6 +168,7 @@ while True:
                                     WINDOW_WIDTH = CELL_SIZE * map_size + PANEL_WIDTH + 50
                                     WINDOW_HEIGHT = max(CELL_SIZE * map_size + 50, 600)
                                     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+                                    game_won = False  # Reset win flag
                                     reset_game()
                                     error_message = ""
                             except:
@@ -181,6 +182,7 @@ while True:
                     elif key == "restart":
                         auto_play = False
                         paused = False
+                        game_won = False  # Reset win flag
                         reset_game()
 
         elif event.type == pygame.KEYDOWN and active_input:
@@ -191,37 +193,37 @@ while True:
             else:
                 input_texts[active_input] += event.unicode
 
-    if auto_play and not paused:
+    # FIXED GAME LOOP - Only runs when game is active
+    if auto_play and not paused and not game_over:
         score -= 1
         step_count += 1
         if 'G' in percepts:
             if agent.grab(env):
                 score += 10
         
-        # agent.move_forward(env)
-        # agent.turn_left()
-        # vis.fire_arrow()
-        
         env.agent_pos = agent.position
         percepts = env.get_percepts()
         #inference engine to deduce neighboring cells are safe or not
-        ie.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
-        print(f"Step {step_count} advanced {advanced_setting} gameover {game_over} visited status {env.agent_pos[0]}{env.agent_pos[1]}: {env.grid[env.agent_pos[0]][env.agent_pos[1]].visited}")
+        inference_engine.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
+        
         actions = []
-        if advanced_setting:
-            advanced_make_next_action(agent, ie, env, actions)
-        else:
-            make_next_action(agent, ie, env, actions)
+        make_next_action(agent, inference_engine, env, actions)
         
         for action in actions:
             print("Action taken:", action)
+            
+            # Check if game completed successfully (agent climbed out with gold)
+            if action == "climb" and agent.has_gold and tuple(agent.position) == (0, 0):
+                auto_play = False
+                game_over = True
+                game_won = True
+                break
         
-        # print("Arrows left:", agent.arrows)
+        print("Arrows left:", agent.arrows)
 
-        # for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
-        #     print(f"cell({di}, {dj}) is " + ie.infer((di, dj)))
-        # ie.kb.show()
-        
+        for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
+            print(f"cell({di}, {dj}) is " + inference_engine.infer((di, dj)))
+        inference_engine.kb.show()
         
         x, y = agent.position
         cell = env.grid[x][y]
@@ -229,20 +231,6 @@ while True:
            game_over = True
            auto_play = False
            paused = True
-        
-        if not game_over and advanced_setting and step_count > 0 and step_count % 5 == 0:
-            print(f"--- Wumpuses are moving (end of step {step_count}) ---")
-            env.move_wumpuses()
-            ie.reset_wumpus_knowledge()  # Agent's knowledge of Wumpus locations is now outdated
-            # ie.kb.reset_wumpus_knowledge()  # Reset Wumpus knowledge in the inference engine
-            # Check if a Wumpus moved into the agent's cell
-            x, y = agent.position
-            if env.grid[x][y].has_wumpus:
-                score -= 1000
-                game_over = True
-                win_message = "You lose! A Wumpus moved on top of you!"
-        
-        # paused = True
 
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))
@@ -259,8 +247,12 @@ while True:
     draw_score(screen, panel_left + 10, 430, score)
     
     if game_over:
-        lose_surf = small_font.render("You lose!", True, (255, 0, 0))
-        screen.blit(lose_surf, (panel_left + 10, 460))
+        if game_won:
+            win_surf = small_font.render("You win! Agent escaped with gold!", True, (0, 255, 0))
+            screen.blit(win_surf, (panel_left + 10, 460))
+        else:
+            lose_surf = small_font.render("You lose!", True, (255, 0, 0))
+            screen.blit(lose_surf, (panel_left + 10, 460))
 
     if error_message:
         err_label = small_font.render(error_message, True, (255, 0, 0))

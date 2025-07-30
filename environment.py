@@ -23,34 +23,11 @@ class Environment:
         self.agent_dir = "E"
         self.num_wumpus = num_wumpus
         self.pit_prob = pit_prob
-        self.wumpus_positions = []
         self.place_pits()
         self.place_wumpuses()
         self.place_gold()
-        self.update_percepts()
         self.remaining_wumpuses = self.num_wumpus  # Track remaining Wumpuses
 
-    def update_percepts(self):
-        # """ Recalculates all stenches and breezes on the map. """
-        for x in range(self.size):
-            for y in range(self.size):
-                self.grid[x][y].breeze = False
-                self.grid[x][y].stench = False
-
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.grid[x][y].has_pit:
-                    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                        nx, ny = x + dx, y + dy
-                        if in_bounds(nx, ny, self.size):
-                            self.grid[nx][ny].breeze = True
-        
-        for wumpus_pos in self.wumpus_positions:
-            wx, wy = wumpus_pos
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                nx, ny = wx + dx, wy + dy
-                if in_bounds(nx, ny, self.size):
-                    self.grid[nx][ny].stench = True
 
     def place_pits(self):
         for x in range(self.size):
@@ -68,7 +45,6 @@ class Environment:
             x, y = random.randint(0, self.size-1), random.randint(0, self.size-1)
             if (x, y) != (0, 0) and not self.grid[x][y].has_pit and not self.grid[x][y].has_wumpus:
                 self.grid[x][y].has_wumpus = True
-                self.wumpus_positions.append([x, y]) # Add position to our list
                 for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
                     nx, ny = x + dx, y + dy
                     if in_bounds(nx, ny, self.size):
@@ -82,30 +58,6 @@ class Environment:
                 self.grid[x][y].has_gold = True
                 self.grid[x][y].glitter = True
                 break
-    
-    def move_wumpuses(self):
-        # """ Moves each wumpus to a valid random adjacent cell. """
-        new_positions = []
-        occupied = {tuple(pos) for pos in self.wumpus_positions}
-
-        for x, y in self.wumpus_positions:
-            self.grid[x][y].has_wumpus = False
-            
-            valid_moves = [[x, y]]
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                nx, ny = x + dx, y + dy
-                if in_bounds(nx, ny, self.size) and not self.grid[nx][ny].has_pit and (nx, ny) not in occupied:
-                    valid_moves.append([nx, ny])
-            
-            new_pos = random.choice(valid_moves)
-            new_positions.append(new_pos)
-            occupied.add(tuple(new_pos))  # prevent collisions
-        
-        self.wumpus_positions = new_positions
-        for x, y in self.wumpus_positions:
-            self.grid[x][y].has_wumpus = True
-            
-        self.update_percepts() # Recalculate stenches
 
     def get_percepts(self):
         x, y = self.agent_pos

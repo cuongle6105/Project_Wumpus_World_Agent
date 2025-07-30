@@ -31,9 +31,6 @@ class Agent:
             if cell.has_wumpus:
                 cell.has_wumpus = False
                 env.remaining_wumpuses -= 1  # Update count in environment
-                if [x, y] in env.wumpus_positions:
-                    env.wumpus_positions.remove([x, y])
-                env.update_percepts()
                 return True  # Wumpus killed
             x += dx
             y += dy
@@ -63,12 +60,5 @@ class Agent:
         if env.grid[x][y].has_gold:
             self.has_gold = True
             env.grid[x][y].has_gold = False
-            env.grid[x][y].glitter = False
             return True
-        return False
-    
-    def climb(self, env):
-        if self.position == [0, 0]:
-            return True
-
         return False
