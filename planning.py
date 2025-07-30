@@ -96,10 +96,7 @@ class Planner:
         return None
 
     # Shoot Wumpus
-    def find_wumpus_direction(self, pos, inference, agent_dir, desperate=False) -> Optional[str]:
-        if not desperate:
-            return None
-        
+    def find_wumpus_direction(self, pos, inference, agent_dir) -> Optional[str]:
         for dir in self.directions:
             dx, dy = self.direction_deltas[dir]
             x, y = pos
@@ -131,22 +128,17 @@ class Planner:
             return "climb"
 
         target = (0, 0) if self.returning else self.get_target(pos, inference, env)
-        if not target:
-            return "turn_right"
-
+        # If target position exists, but no path to it, find Wumpus to kill 
         if target:
             path = self.dijkstra(pos, target, inference, env)
-            
             if not path or len(path) < 2:
-                # Target position exists, but no path to it, find Wumpus to kill 
                 if agent.arrows > 0:
-                    kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction, desperate=True)
+                    kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction)
                     if kill_wumpus_desperate:
                         return kill_wumpus_desperate
                 return "turn_right"
         else:
             return "turn_right"
-
 
         next_pos = path[1]
         dx = next_pos[0] - pos[0]
