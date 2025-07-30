@@ -89,10 +89,9 @@ def reset_game():
     vis = Visualizer(env, agent)
     score = 0
     step_count = 0
-    game_over = False  # Reset game_over flag
+    game_over = False
     percepts = env.get_percepts()
     
-    # Reset the planner for new game
     reset_planner()
 
 # Initial setup
