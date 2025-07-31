@@ -5,6 +5,7 @@ from agent import Agent
 from visualizer import Visualizer
 from inference import InferenceEngine
 from planning import make_next_action, reset_planner
+from advanced_planning import make_advanced_action, make_random_action
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
