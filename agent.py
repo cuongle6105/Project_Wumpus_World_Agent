@@ -65,7 +65,7 @@ class Agent:
     
     def climb(self, env):
         x, y = self.position
-        if (x, y) == (0, 0) and self.has_gold:
+        if (x, y) == (0, 0):
             return True
         return False
         

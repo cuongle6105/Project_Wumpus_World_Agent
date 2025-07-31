@@ -81,7 +81,7 @@ def draw_inputs(surface, panel_left):
 
 
 def reset_game():
-    global env, agent, vis, score, step_count, percepts, game_over
+    global env, agent, vis, score, step_count, percepts, game_end
     env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
@@ -89,7 +89,7 @@ def reset_game():
     vis = Visualizer(env, agent)
     score = 0
     step_count = 0
-    game_over = False
+    game_end = False
     percepts = env.get_percepts()
     reset_planner()
 
@@ -98,8 +98,10 @@ auto_play = False
 paused = False
 score = 0
 step_count = 0
-game_over = False
+game_end = False
 game_won = False
+game_lose = False
+game_tie = False
 inference_engine = InferenceEngine()
 
 reset_game()
@@ -192,7 +194,7 @@ while True:
                 input_texts[active_input] += event.unicode
 
     # Only runs when game is active
-    if auto_play and not paused and not game_over:
+    if auto_play and not paused and not game_end:
         score -= 1
         step_count += 1
         if 'G' in percepts:
@@ -214,8 +216,14 @@ while True:
             if action == "climb" and agent.has_gold and tuple(agent.position) == (0, 0):
                 score += 1000
                 auto_play = False
-                game_over = True
+                game_end = True
                 game_won = True
+                break
+            
+            if action == "climb" and not agent.has_gold and tuple(agent.position) == (0, 0):
+                auto_play = False
+                game_end = True
+                game_tie = True
                 break
         
         print("Arrows left:", agent.arrows)
@@ -226,7 +234,8 @@ while True:
         x, y = agent.position
         cell = env.grid[x][y]
         if cell.has_pit or cell.has_wumpus:
-           game_over = True
+           game_end = True
+           game_lose = True
            auto_play = False
            paused = True
 
@@ -244,14 +253,17 @@ while True:
     draw_percepts_table(screen, panel_left + 10, 310, percepts)
     draw_score(screen, panel_left + 10, 430, score)
     
-    if game_over:
+    if game_end:
         if game_won:
             win_surf = small_font.render("You win! Agent escaped with gold!", True, (0, 200, 100))
             screen.blit(win_surf, (panel_left + 10, 460))
-        else:
+        elif game_lose:
             score -= 1000
             lose_surf = small_font.render("You lose!", True, (255, 0, 0))
             screen.blit(lose_surf, (panel_left + 10, 460))
+        elif game_tie:
+            win_surf = small_font.render("Agent escaped without gold!", True, (0, 0, 0))
+            screen.blit(win_surf, (panel_left + 10, 460))
 
     if error_message:
         err_label = small_font.render(error_message, True, (255, 0, 0))

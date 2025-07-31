@@ -112,42 +112,60 @@ class Planner:
         return None
 
     # Find wumpus
-    def find_wumpus_direction(self, pos, inference, agent_dir, desperate=False) -> Optional[str]:
+    def find_wumpus_tile(self, pos, inference, desperate=False) -> Optional[Tuple[int, int]]:
         x0, y0 = pos
         target = []
-        
-        # Get all Wumpus positions from kb and sort
+
+        # Get all known or suspected Wumpus positions
         for x in range(self.env_size):
             for y in range(self.env_size):
-                if f"W{x}{y}" in inference.kb.facts or (desperate and inference.infer((x, y)) == 'uncertain'):
-                    dist = abs(x - x0) + abs(y - y0)
-                    target.append((dist, (x, y)))
-        target.sort()
+                is_known_wumpus = f"W{x}{y}" in inference.kb.facts
+                is_uncertain = inference.infer((x, y)) == 'uncertain'
+                if is_known_wumpus or (desperate and is_uncertain):
+                    wx, wy = x, y
 
-        # Check if a Wumpus is in a straight line from current pos
-        for _, (wx, wy) in target:
-            if wx == x0:
-                dir = "N" if wy > y0 else "S"
-            elif wy == y0:
-                dir = "E" if wx > x0 else "W"
-            else:
-                continue
-            # Check wall
-            dx, dy = self.direction_deltas[dir]
-            x, y = x0, y0
-            while (x, y) != (wx, wy):
-                x += dx
-                y += dy
-                if not (0 <= x < self.env_size and 0 <= y < self.env_size):
-                    break
-            else:
-                # Reached Wumpus
-                if agent_dir == dir:
-                    return "shoot"
-                else:
-                    return self.turn_toward(agent_dir, dir)
+                    # Vertical
+                    if x == x0:
+                        dy = 1 if wy > y0 else -1
+                        clear_path = True
+                        for ty in range(y0 + dy, wy, dy):
+                            if not (0 <= ty < self.env_size):
+                                clear_path = False
+                                break
+                        if clear_path:
+                            stench_tile = (x0, wy - dy)
+                            dist = abs(wy - y0)
+                            target.append((dist, stench_tile))
+
+                    # Horizontally
+                    elif y == y0:
+                        dx = 1 if wx > x0 else -1
+                        clear_path = True
+                        for tx in range(x0 + dx, wx, dx):
+                            if not (0 <= tx < self.env_size):
+                                clear_path = False
+                                break
+                        if clear_path:
+                            stench_tile = (wx - dx, y0)
+                            dist = abs(wx - x0)
+                            target.append((dist, stench_tile))
+                            
+        if target:
+            target.sort()
+            return target[0][1]
         return None
-
+    
+    # Get the Wumpus direction from stench cell
+    def get_wumpus_direction_from_tile(self, pos, inference) -> Optional[str]:
+        x0, y0 = pos
+        for dir in self.directions:
+            dx, dy = self.direction_deltas[dir]
+            x, y = x0 + dx, y0 + dy
+            if 0 <= x < self.env_size and 0 <= y < self.env_size:
+                if f"W{x}{y}" in inference.kb.facts:
+                    return dir
+        return None
+    
     # The plan of the agent
     def plan(self, agent, inference, env) -> Optional[str]:
         pos = tuple(agent.position)
@@ -197,14 +215,34 @@ class Planner:
 
         # Desperately shoot Wumpus
         if agent.arrows > 0:
-            kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction)
-            if kill_wumpus_desperate:
-                return kill_wumpus_desperate
+            stench_tile = self.find_wumpus_tile(pos, inference)
             
-        # Refind a safe new location to move to next
-        target = (0, 0) if self.returning else self.get_target(pos, inference, env)
-        if target:
-            path = self.dijkstra(pos, target, inference, env)
+            # If at the stench tile, turn to shoot
+            if stench_tile == pos:
+                shoot_dir = self.get_wumpus_direction_from_tile(pos, inference)
+                if shoot_dir:
+                    if agent.direction == shoot_dir:
+                        return "shoot"
+                    else:
+                        return self.turn_toward(agent.direction, shoot_dir)
+            
+            # Otherwise, move toward it
+            if stench_tile:
+                path = self.dijkstra(pos, stench_tile, inference, env)
+                if path and len(path) >= 2:
+                    next_pos = path[1]
+                    dx = next_pos[0] - pos[0]
+                    dy = next_pos[1] - pos[1]
+                    desired_dir = self.dir_map.get((dx, dy), agent.direction)
+
+                    if agent.direction != desired_dir:
+                        return self.turn_toward(agent.direction, desired_dir)
+                    else:
+                        return "move_forward"
+                            
+        # Stuck and returning to (0, 0)
+        if pos != (0, 0):
+            path = self.dijkstra(pos, (0, 0), inference, env)
             if path and len(path) >= 2:
                 next_pos = path[1]
                 dx = next_pos[0] - pos[0]
@@ -215,24 +253,9 @@ class Planner:
                     return self.turn_toward(agent.direction, desired_dir)
                 else:
                     return "move_forward"
+        else:
+            return "climb"
 
-        # Refind a safe old location to move to next
-        backtrack_target = self.get_backtrack_target(pos, inference, env)
-        if backtrack_target:
-            path = self.dijkstra(pos, backtrack_target, inference, env)
-            if path and len(path) >= 2:
-                next_pos = path[1]
-                dx = next_pos[0] - pos[0]
-                dy = next_pos[1] - pos[1]
-                desired_dir = self.dir_map.get((dx, dy), agent.direction)
-
-                if agent.direction != desired_dir:
-                    return self.turn_toward(agent.direction, desired_dir)
-                else:
-                    return "move_forward"
-            
-        return "turn_right"
-        
 planner = None
 
 # Make the agent do the next action
