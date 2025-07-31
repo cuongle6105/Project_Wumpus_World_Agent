@@ -6,6 +6,7 @@ from visualizer import Visualizer
 from inference import InferenceEngine
 from planning import make_next_action, reset_planner
 from advanced_planning import make_advanced_action, make_random_action
+from testcases import map1, map2, map3
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
