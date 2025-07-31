@@ -1,8 +1,37 @@
 from agent import Agent
 from environment import DIRECTIONS
 import heapq
+import random
 
-def make_next_action(agent, inference, env, actions):
+def make_random_action(agent, env, actions):
+    possible_actions = ["FORWARD", "TURN_LEFT", "TURN_RIGHT", "GRAB", "CLIMB"]
+    
+    # Only allow "SHOOT" if the agent has arrows
+    if agent.arrows > 0:
+        possible_actions.append("SHOOT")
+
+    action = random.choice(possible_actions)
+    actions.append(action)
+
+    # Optional: update agent or environment based on action
+    if action == "FORWARD":
+        agent.move_forward(env)
+    elif action == "TURN_LEFT":
+        agent.turn_left()
+    elif action == "TURN_RIGHT":
+        agent.turn_right()
+    elif action == "GRAB":
+        if env.grid[agent.position[0]][agent.position[1]].has_gold:
+            agent.has_gold = True
+            env.grid[agent.position[0]][agent.position[1]].has_gold = False
+    elif action == "CLIMB":
+        if agent.position == [0, 0] and agent.has_gold:
+            agent.exited = True
+    elif action == "SHOOT":
+        agent.arrows -= 1
+
+
+def make_advanced_action(agent, inference, env, actions):
     x, y = agent.position
     # dir_map = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
     dir_map = {(0, 1): "N", (1, 0): "E", (0, -1): "S", (-1, 0): "W"}
