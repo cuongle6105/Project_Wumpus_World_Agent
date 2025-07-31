@@ -83,6 +83,7 @@ class Planner:
             return target[0][1]
         return None
     
+    # Returns the position of the closest safe and visited tile
     def get_backtrack_target(self, pos, inference, env) -> Optional[Tuple[int, int]]:
         target = []
         for p in self.visited:
@@ -110,21 +111,41 @@ class Planner:
             return "turn_right"
         return None
 
-    # Shoot Wumpus
-    def find_wumpus_direction(self, pos, inference, agent_dir) -> Optional[str]:
-        for dir in self.directions:
+    # Find wumpus
+    def find_wumpus_direction(self, pos, inference, agent_dir, desperate=False) -> Optional[str]:
+        x0, y0 = pos
+        target = []
+        
+        # Get all Wumpus positions from kb and sort
+        for x in range(self.env_size):
+            for y in range(self.env_size):
+                if f"W{x}{y}" in inference.kb.facts or (desperate and inference.infer((x, y)) == 'uncertain'):
+                    dist = abs(x - x0) + abs(y - y0)
+                    target.append((dist, (x, y)))
+        target.sort()
+
+        # Check if a Wumpus is in a straight line from current pos
+        for _, (wx, wy) in target:
+            if wx == x0:
+                dir = "N" if wy > y0 else "S"
+            elif wy == y0:
+                dir = "E" if wx > x0 else "W"
+            else:
+                continue
+            # Check wall
             dx, dy = self.direction_deltas[dir]
-            x, y = pos
-            for _ in range(self.env_size):
+            x, y = x0, y0
+            while (x, y) != (wx, wy):
                 x += dx
                 y += dy
                 if not (0 <= x < self.env_size and 0 <= y < self.env_size):
                     break
-                if f"W{x}{y}" in inference.kb.facts:
-                    if agent_dir == dir:
-                        return "shoot"
-                    else:
-                        return self.turn_toward(agent_dir, dir)
+            else:
+                # Reached Wumpus
+                if agent_dir == dir:
+                    return "shoot"
+                else:
+                    return self.turn_toward(agent_dir, dir)
         return None
 
     # The plan of the agent
@@ -136,14 +157,16 @@ class Planner:
         if 'G' in percepts and not agent.has_gold:
             return "grab"
 
+        # Prioritize returning when has gold
         if agent.has_gold:
             self.returning = True
 
+        # Climb if has gold and at (0, 0)
         if self.returning and pos == (0, 0):
             return "climb"
 
+        # Find a safe new location to move to next
         target = (0, 0) if self.returning else self.get_target(pos, inference, env)
-
         if target:
             path = self.dijkstra(pos, target, inference, env)
             if path and len(path) >= 2:
@@ -157,7 +180,7 @@ class Planner:
                 else:
                     return "move_forward"
 
-        # Step 3: No target or path failed — backtrack to visited safe tile with unexplored neighbors
+        # Find a safe old location to move to next
         backtrack_target = self.get_backtrack_target(pos, inference, env)
         if backtrack_target:
             path = self.dijkstra(pos, backtrack_target, inference, env)
@@ -172,25 +195,43 @@ class Planner:
                 else:
                     return "move_forward"
 
-        # Step 4: Desperate move — shoot Wumpus
+        # Desperately shoot Wumpus
         if agent.arrows > 0:
-            kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction, desperate=True)
+            kill_wumpus_desperate = self.find_wumpus_direction(pos, inference, agent.direction)
             if kill_wumpus_desperate:
                 return kill_wumpus_desperate
+            
+        # Refind a safe new location to move to next
+        target = (0, 0) if self.returning else self.get_target(pos, inference, env)
+        if target:
+            path = self.dijkstra(pos, target, inference, env)
+            if path and len(path) >= 2:
+                next_pos = path[1]
+                dx = next_pos[0] - pos[0]
+                dy = next_pos[1] - pos[1]
+                desired_dir = self.dir_map.get((dx, dy), agent.direction)
 
-        # Step 5: Nothing left — just turn
+                if agent.direction != desired_dir:
+                    return self.turn_toward(agent.direction, desired_dir)
+                else:
+                    return "move_forward"
+
+        # Refind a safe old location to move to next
+        backtrack_target = self.get_backtrack_target(pos, inference, env)
+        if backtrack_target:
+            path = self.dijkstra(pos, backtrack_target, inference, env)
+            if path and len(path) >= 2:
+                next_pos = path[1]
+                dx = next_pos[0] - pos[0]
+                dy = next_pos[1] - pos[1]
+                desired_dir = self.dir_map.get((dx, dy), agent.direction)
+
+                if agent.direction != desired_dir:
+                    return self.turn_toward(agent.direction, desired_dir)
+                else:
+                    return "move_forward"
+            
         return "turn_right"
-
-
-        next_pos = path[1]
-        dx = next_pos[0] - pos[0]
-        dy = next_pos[1] - pos[1]
-        desired_dir = self.dir_map.get((dx, dy), agent.direction)
-
-        if agent.direction != desired_dir:
-            return self.turn_toward(agent.direction, desired_dir)
-        else:
-            return "move_forward"
         
 planner = None
 
