@@ -62,7 +62,6 @@ class InferenceEngine:
             
             still_uncertain = []
             for opts in self.uncertains:
-                opts -= self.kb.neg_facts  # remove known false options
                 opts -= self.kb.facts 
                 if len(opts) == 1:
                     fact = next(iter(opts))
@@ -89,8 +88,8 @@ class InferenceEngine:
                 
             if not is_unsafe:
                 for opts in self.uncertains:
-                    if (f"W{name(xpos, ypos)}" in opts and f"W{name(xpos, ypos)}" not in self.kb.neg_facts) or \
-                    (f"P{name(xpos, ypos)}" in opts and f"P{name(xpos, ypos)}" not in self.kb.neg_facts):
+                    if (f"W{name(xpos, ypos)}" in opts) or \
+                    (f"P{name(xpos, ypos)}" in opts):
                         is_uncertain = True
                         break
 

@@ -95,7 +95,8 @@ def reset_game_preset(preset_map=None):
     reset_planner()
 
 def reset_game():
-    global env, agent, vis, score, step_count, percepts, game_end
+    global env, agent, vis, score, step_count, percepts, game_end, inference_engine
+    inference_engine = InferenceEngine()
     env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
@@ -116,7 +117,6 @@ game_end = False
 game_won = False
 game_lose = False
 game_tie = False
-inference_engine = InferenceEngine()
 
 reset_game()
 
