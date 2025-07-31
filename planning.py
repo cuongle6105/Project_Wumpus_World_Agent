@@ -177,10 +177,14 @@ class Planner:
 
         # Prioritize returning when has gold
         if agent.has_gold:
+            x, y = agent.position
+            env.grid[x][y].has_gold = False
+            env.grid[x][y].glitter = False
             self.returning = True
 
         # Climb if has gold and at (0, 0)
         if self.returning and pos == (0, 0):
+            agent.has_gold = True
             return "climb"
 
         # Find a safe new location to move to next
@@ -240,7 +244,7 @@ class Planner:
                     else:
                         return "move_forward"
                             
-        # Stuck and returning to (0, 0)
+        # Agent stuck and returning to (0, 0) without gold
         if pos != (0, 0):
             path = self.dijkstra(pos, (0, 0), inference, env)
             if path and len(path) >= 2:
