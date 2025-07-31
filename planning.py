@@ -28,10 +28,19 @@ class Planner:
 
     # Check is a position is safe to move to
     def is_safe(self, pos, inference, env):
+        if not (0 <= pos[0] < self.env_size and 0 <= pos[1] < self.env_size):
+            return False
+
         if inference.infer(pos) == 'unsafe':
             return False
         cell = env.grid[pos[0]][pos[1]]
         return not (getattr(cell, 'has_pit', False) or getattr(cell, 'has_wumpus', False))
+
+    
+    # Check is a position is uncertain
+    def is_uncertain(self, pos, inference):
+        return inference.infer(pos) == 'uncertain'
+
 
     # Dijkstra for pathfinding
     def dijkstra(self, start, goal, inference, env) -> Optional[List[Tuple[int, int]]]:
@@ -98,7 +107,21 @@ class Planner:
             target.sort()
             return target[0][1]
         return None
-
+    
+    # Returns the position of the closest uncertain and unvisited tile
+    def get_uncertain_target(self, pos, inference) -> Optional[Tuple[int, int]]:
+        target = []
+        for x in range(self.env_size):
+            for y in range(self.env_size):
+                p = (x, y)
+                if p not in self.visited and self.is_uncertain(p, inference):
+                    dist = abs(pos[0] - x) + abs(pos[1] - y)
+                    target.append((dist, p))
+        if target:
+            target.sort()
+            return target[0][1]
+        return None
+    
     # Turn towards a direction
     def turn_toward(self, current_dir, target_dir):
         dirs = self.directions
@@ -192,6 +215,22 @@ class Planner:
         if target:
             path = self.dijkstra(pos, target, inference, env)
             if path and len(path) >= 2:
+                next_pos = path[1]
+                dx = next_pos[0] - pos[0]
+                dy = next_pos[1] - pos[1]
+                desired_dir = self.dir_map.get((dx, dy), agent.direction)
+
+                if agent.direction != desired_dir:
+                    return self.turn_toward(agent.direction, desired_dir)
+                else:
+                    return "move_forward"
+        
+        # Find a uncertain new location to move to next
+        uncertain_target = self.get_uncertain_target(pos, inference)
+        if uncertain_target:
+            path = self.dijkstra(pos, uncertain_target, inference, env)
+            if path and len(path) >= 2:
+                self.visited.add(uncertain_target)
                 next_pos = path[1]
                 dx = next_pos[0] - pos[0]
                 dy = next_pos[1] - pos[1]

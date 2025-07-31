@@ -5,6 +5,7 @@ from agent import Agent
 from visualizer import Visualizer
 from inference import InferenceEngine
 from planning import make_next_action, reset_planner
+from testcases import map1, map2, map3
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
@@ -79,6 +80,18 @@ def draw_inputs(surface, panel_left):
         text = font.render(input_texts[key], True, (0, 0, 0))
         surface.blit(text, (input_boxes[key].x + 5, input_boxes[key].y + 5))
 
+def reset_game_preset(preset_map=None):
+    global env, agent, vis, score, step_count, percepts, game_end
+    env = Environment.from_grid(preset_map["grid"], preset_map["size"])
+    env.grid[0][0].has_pit = False
+    env.grid[0][0].has_wumpus = False
+    agent = Agent()
+    vis = Visualizer(env, agent)
+    score = 0
+    step_count = 0
+    game_end = False
+    percepts = env.get_percepts()
+    reset_planner()
 
 def reset_game():
     global env, agent, vis, score, step_count, percepts, game_end
@@ -130,6 +143,11 @@ while True:
         "pause": pygame.Rect(panel_left + 110, 250, 80, 40),
         "restart": pygame.Rect(panel_left + 200, 250, 80, 40)
     }
+    map_buttons = {
+        "map1": pygame.Rect(panel_left + 10, 500, 100, 35),
+        "map2": pygame.Rect(panel_left + 125, 500, 100, 35),
+        "map3": pygame.Rect(panel_left + 240, 500, 100, 35)
+    }
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -147,6 +165,14 @@ while True:
                 advanced_setting = False
             elif setting_buttons["advanced"].collidepoint(event.pos):
                 advanced_setting = True
+                
+            if map_buttons["map1"].collidepoint(event.pos):
+                reset_game_preset(map1)
+            elif map_buttons["map2"].collidepoint(event.pos):
+                reset_game_preset(map2)
+            elif map_buttons["map3"].collidepoint(event.pos):
+                reset_game_preset(map3)
+
 
             for key, rect in control_buttons.items():
                 if rect.collidepoint(event.pos):
@@ -249,6 +275,10 @@ while True:
     draw_button(screen, control_buttons["play"], "Play", auto_play and not paused)
     draw_button(screen, control_buttons["pause"], "Pause", paused)
     draw_button(screen, control_buttons["restart"], "Restart", False)
+    
+    draw_button(screen, map_buttons["map1"], "Map 1", False)
+    draw_button(screen, map_buttons["map2"], "Map 2", False)
+    draw_button(screen, map_buttons["map3"], "Map 3", False)
 
     draw_percepts_table(screen, panel_left + 10, 310, percepts)
     draw_score(screen, panel_left + 10, 430, score)
