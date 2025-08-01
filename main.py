@@ -14,7 +14,7 @@ small_font = pygame.font.SysFont("Arial", 14)
 
 info = pygame.display.Info()
 DISPLAY_WIDTH, DISPLAY_HEIGHT = info.current_w - 70, info.current_h - 70
-PANEL_WIDTH = 340
+PANEL_WIDTH = 380
 
 # Input settings
 def calculate_cell_size(n):
@@ -127,8 +127,9 @@ while True:
 
     # Update button and input positions
     setting_buttons = {
-        "basic": pygame.Rect(panel_left + 20, 20, 120, 35),
-        "advanced": pygame.Rect(panel_left + 150, 20, 120, 35)
+    "basic": pygame.Rect(panel_left + 20, 20, 100, 35),
+    "advanced": pygame.Rect(panel_left + 140, 20, 100, 35),  # 20 + 100 + 20
+    "random": pygame.Rect(panel_left + 260, 20, 100, 35)     # 140 + 100 + 20
     }
     input_boxes = {
         "size": pygame.Rect(panel_left + 120, 80, 60, 30),
@@ -163,6 +164,12 @@ while True:
                 advanced_setting = False
             elif setting_buttons["advanced"].collidepoint(event.pos):
                 advanced_setting = True
+            elif setting_buttons["random"].collidepoint(event.pos):
+                auto_play = False
+                paused = False
+                game_won = False
+                reset_game()  # tạo map ngẫu nhiên mới
+                make_random_action(agent, env, action_log)
                 
             if map_buttons["map1"].collidepoint(event.pos):
                 auto_play = False
@@ -276,6 +283,7 @@ while True:
 
     draw_button(screen, setting_buttons["basic"], "Basic", not advanced_setting)
     draw_button(screen, setting_buttons["advanced"], "Advanced", advanced_setting)
+    draw_button(screen, setting_buttons["random"], "Random", False)
     draw_inputs(screen, panel_left)
     draw_button(screen, control_buttons["create"], "Create Map", False)
     draw_button(screen, control_buttons["play"], "Play", auto_play and not paused)
