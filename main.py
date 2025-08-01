@@ -31,7 +31,7 @@ clock = pygame.time.Clock()
 # Game state variables
 wumpus_count = 2
 pit_ratio = 0.2
-advanced_setting = False
+current_setting = "basic"
 action_log = []
 
 def draw_button(surface, rect, text, active):
@@ -161,15 +161,11 @@ while True:
                 active_input = None
 
             if setting_buttons["basic"].collidepoint(event.pos):
-                advanced_setting = False
+                current_setting = "basic"
             elif setting_buttons["advanced"].collidepoint(event.pos):
-                advanced_setting = True
+                current_setting = "advanced"
             elif setting_buttons["random"].collidepoint(event.pos):
-                auto_play = False
-                paused = False
-                game_won = False
-                reset_game()  # tạo map ngẫu nhiên mới
-                make_random_action(agent, env, action_log)
+                current_setting = "random"
                 
             if map_buttons["map1"].collidepoint(event.pos):
                 auto_play = False
@@ -247,7 +243,12 @@ while True:
         inference_engine.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
         
         actions = []
-        make_next_action(agent, inference_engine, env, actions, action_log)
+        if (current_setting == "basic"):
+            make_next_action(agent, inference_engine, env, actions, action_log)
+        elif (current_setting == "advanced"):
+            make_advanced_action(agent, inference_engine, env, actions, action_log)
+        elif (current_setting == "random"):
+            make_random_action(agent, inference_engine, env, actions, action_log)
         
         for action in actions:
             
@@ -281,9 +282,9 @@ while True:
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))
 
-    draw_button(screen, setting_buttons["basic"], "Basic", not advanced_setting)
-    draw_button(screen, setting_buttons["advanced"], "Advanced", advanced_setting)
-    draw_button(screen, setting_buttons["random"], "Random", False)
+    draw_button(screen, setting_buttons["basic"], "Basic", current_setting == "basic")
+    draw_button(screen, setting_buttons["advanced"], "Advanced", current_setting == "advanced")
+    draw_button(screen, setting_buttons["random"], "Random", current_setting == "random")
     draw_inputs(screen, panel_left)
     draw_button(screen, control_buttons["create"], "Create Map", False)
     draw_button(screen, control_buttons["play"], "Play", auto_play and not paused)
