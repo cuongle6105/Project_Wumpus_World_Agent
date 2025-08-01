@@ -32,6 +32,7 @@ clock = pygame.time.Clock()
 wumpus_count = 2
 pit_ratio = 0.2
 advanced_setting = False
+action_log = []
 
 def draw_button(surface, rect, text, active):
     color = (0, 255, 0) if active else (200, 200, 200)
@@ -82,7 +83,9 @@ def draw_inputs(surface, panel_left):
         surface.blit(text, (input_boxes[key].x + 5, input_boxes[key].y + 5))
 
 def reset_game_preset(preset_map=None):
-    global env, agent, vis, score, step_count, percepts, game_end
+    global env, agent, vis, score, step_count, percepts, game_end, inference_engine
+    global auto_play, paused, game_won, game_lose, game_tie  # ADD THIS
+    inference_engine = InferenceEngine()
     env = Environment.from_grid(preset_map["grid"], preset_map["size"])
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
@@ -92,6 +95,11 @@ def reset_game_preset(preset_map=None):
     step_count = 0
     game_end = False
     percepts = env.get_percepts()
+    auto_play = False
+    paused = False
+    game_won = False
+    game_lose = False
+    game_tie = False
     reset_planner()
 
 def reset_game():
@@ -168,10 +176,19 @@ while True:
                 advanced_setting = True
                 
             if map_buttons["map1"].collidepoint(event.pos):
+                auto_play = False
+                paused = False
+                game_won = False
                 reset_game_preset(map1)
             elif map_buttons["map2"].collidepoint(event.pos):
+                auto_play = False
+                paused = False
+                game_won = False
                 reset_game_preset(map2)
             elif map_buttons["map3"].collidepoint(event.pos):
+                auto_play = False
+                paused = False
+                game_won = False
                 reset_game_preset(map3)
 
 
@@ -234,10 +251,9 @@ while True:
         inference_engine.process_percepts(env.agent_pos[0], env.agent_pos[1], percepts, env)
         
         actions = []
-        make_next_action(agent, inference_engine, env, actions)
+        make_next_action(agent, inference_engine, env, actions, action_log)
         
         for action in actions:
-            print("Action taken:", action)
             
             # Check if game completed successfully
             if action == "climb" and agent.has_gold and tuple(agent.position) == (0, 0):
@@ -287,13 +303,16 @@ while True:
     if game_end:
         if game_won:
             win_surf = small_font.render("You win! Agent escaped with gold!", True, (0, 200, 100))
+            #print(f"Action log: {action_log}")
             screen.blit(win_surf, (panel_left + 10, 460))
         elif game_lose:
             score -= 1000
             lose_surf = small_font.render("You lose!", True, (255, 0, 0))
+            #print(f"Action log: {action_log}")
             screen.blit(lose_surf, (panel_left + 10, 460))
         elif game_tie:
             win_surf = small_font.render("Agent escaped without gold!", True, (0, 0, 0))
+            #print(f"Action log: {action_log}")
             screen.blit(win_surf, (panel_left + 10, 460))
 
     if error_message:

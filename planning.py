@@ -26,21 +26,20 @@ class Planner:
                 neighbors.append((nx, ny))
         return neighbors
 
-    # Check is a position is safe to move to
+    # Check is a position is safe to move to    
     def is_safe(self, pos, inference, env):
-        if not (0 <= pos[0] < self.env_size and 0 <= pos[1] < self.env_size):
+        if not (0 <= pos[0] < env.size and 0 <= pos[1] < env.size):
             return False
 
         if inference.infer(pos) == 'unsafe':
             return False
+
         cell = env.grid[pos[0]][pos[1]]
         return not (getattr(cell, 'has_pit', False) or getattr(cell, 'has_wumpus', False))
 
-    
     # Check is a position is uncertain
     def is_uncertain(self, pos, inference):
         return inference.infer(pos) == 'uncertain'
-
 
     # Dijkstra for pathfinding
     def dijkstra(self, start, goal, inference, env) -> Optional[List[Tuple[int, int]]]:
@@ -302,7 +301,7 @@ class Planner:
 planner = None
 
 # Make the agent do the next action
-def make_next_action(agent, inference, env, actions):
+def make_next_action(agent, inference, env, actions, action_log):
     global planner
     if planner is None:
         planner = Planner(env.size)
@@ -312,6 +311,7 @@ def make_next_action(agent, inference, env, actions):
         return
     
     actions.append(action)
+    action_log.append(action)
 
     if action == "move_forward":
         agent.move_forward(env)

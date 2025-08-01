@@ -1,43 +1,57 @@
 map1 = {
-    "description": "6x6 with 2 Wumpus, multiple pits, trickier gold location",
-    "size": 6,
-    "grid": [
-        ["", "", "", "", "W", ""],
-        ["", "P", "", "", "", ""],
-        ["", "", "", "P", "G", ""],
-        ["", "W", "", "", "", ""],
-        ["", "", "", "", "P", ""],
-        ["", "", "", "", "", ""]
-    ]
-}
-
-map2 = {
-    "description": "8x8 with 3 Wumpus, many pits, gold hidden centrally",
+    "description": "Standard 8x8 map with 3 Wumpus, many pits, gold in the middle",
     "size": 8,
     "grid": [
         ["", "", "P", "", "W", "", "", ""],
-        ["P", "", "P", "", "", "P", "", ""],
+        ["P", "", "P", "", "P", "P", "", ""],
         ["", "P", "", "", "", "", "", "W"],
-        ["", "", "", "P", "", "G", "P", ""],
-        ["", "P", "", "", "", "", "", ""],
-        ["", "", "", "", "P", "", "", ""],
-        ["", "", "W", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""]
-    ]
+        ["", "", "", "P", "G", "", "P", ""],
+        ["", "P", "", "P", "", "", "P", ""],
+        ["", "", "", "", "P", "P", "", ""],
+        ["", "", "W", "", "", "", "P", ""],
+        ["", "", "", "", "", "", "", ""],
+    ],
+    "action log": 
+        ['turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'grab', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'grab', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'climb'],
+    "expected_behavior": "Get the gold and go back to (0, 0)",
+    "final map state": "Agent climed at (0, 0) with gold"
 }
+
+map2 = {
+    "description": "Sammler 6x6 map with 4 Wumpus, 4 pits, gold at the top",
+    "size": 6,
+    "grid": [
+        ["W", "", "", "", "", "G"],
+        ["", "P", "", "W", "", ""],
+        ["", "", "", "P", "", ""],
+        ["", "", "", "", "", ""],
+        ["W", "", "P", "", "P", ""],
+        ["", "", "", "W", "", ""]
+    ],
+    "action log": 
+        ['turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'grab', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'grab', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'climb', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'grab', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'climb', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'grab', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'climb'],
+    "expected_behavior": "Get the gold and go back to (0, 0)",
+    "final map state": "Agent climed at (0, 0) with gold"
+}
+
 map3 = {
-    "description": "10x10 with 2 Wumpuses in corners, gold lured into a pit maze",
+    "description": "10x10 with 2 Wumpuses, no way to gold",
     "size": 10,
     "grid": [
-        ["", "", "", "", "", "", "", "", "", "W"],
+        ["", "", "", "", "", "", "", "", "", ""],
         ["P", "", "P", "", "P", "", "", "P", "", ""],
-        ["", "", "", "", "", "", "P", "", "", ""],
+        ["", "P", "", "", "", "", "P", "", "", ""],
         ["", "P", "", "P", "", "", "", "", "P", ""],
         ["", "", "P", "", "G", "", "P", "", "", ""],
-        ["", "", "", "P", "", "", "", "", "", ""],
+        ["W", "", "", "P", "", "", "", "", "", ""],
         ["", "", "", "", "P", "", "P", "", "P", ""],
-        ["P", "", "", "", "", "", "", "", "", ""],
-        ["", "", "W", "", "", "", "P", "", "", ""],
-        ["", "", "", "", "", "", "", "", "", ""]
-    ]
+        ["P", "", "", "", "", "P", "", "", "", ""],
+        ["", "P", "W", "", "", "P", "P", "", "", ""],
+        ["", "", "", "", "", "", "P", "", "", ""]
+    ],
+    
+    "action log": 
+        ['turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'grab', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'grab', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'climb', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'grab', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'climb', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'grab', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'climb', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'turn_right', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'move_forward', 'move_forward', 'turn_left', 'move_forward', 'turn_right', 'turn_right', 'move_forward', 'climb'],    "expected_behavior": "Get the gold and go back to (0, 0)",
+    "expected_behavior": "Agent exhausting all paths and go back to (0, 0) without gold",
+    "final map state": "Agent climed at (0, 0) with gold"
 }

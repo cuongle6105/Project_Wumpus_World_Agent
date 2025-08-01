@@ -88,7 +88,7 @@ class Environment:
 
         for i in range(size):
             for j in range(size):
-                contents = grid_data[i][j]
+                contents = grid_data[size - 1 - i][j]
                 if "P" in contents:
                     env.grid[i][j].has_pit = True
                 if "W" in contents:
@@ -96,7 +96,7 @@ class Environment:
                 if "G" in contents:
                     env.grid[i][j].has_gold = True
                     env.grid[i][j].glitter = True
-                    
+
         for i in range(size):
             for j in range(size):
                 if env.grid[i][j].has_pit:
@@ -105,5 +105,4 @@ class Environment:
                 if env.grid[i][j].has_wumpus:
                     for ni, nj in env.adjacent(i, j):
                         env.grid[ni][nj].stench = True
-
         return env
