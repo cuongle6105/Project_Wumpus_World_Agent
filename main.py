@@ -82,11 +82,14 @@ def draw_inputs(surface, panel_left):
         text = font.render(input_texts[key], True, (0, 0, 0))
         surface.blit(text, (input_boxes[key].x + 5, input_boxes[key].y + 5))
 
-def reset_game_preset(preset_map=None):
+def reset_game(preset_map=None):
     global env, agent, vis, score, step_count, percepts, game_end, inference_engine
-    global auto_play, paused, game_won, game_lose, game_tie  # ADD THIS
+    global auto_play, paused, game_won, game_lose, game_tie
     inference_engine = InferenceEngine()
-    env = Environment.from_grid(preset_map["grid"], preset_map["size"])
+    if preset_map is None: 
+        env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
+    else:
+        env = Environment.from_grid(preset_map["grid"], preset_map["size"])
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
     agent = Agent()
@@ -100,20 +103,6 @@ def reset_game_preset(preset_map=None):
     game_won = False
     game_lose = False
     game_tie = False
-    reset_planner()
-
-def reset_game():
-    global env, agent, vis, score, step_count, percepts, game_end, inference_engine
-    inference_engine = InferenceEngine()
-    env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
-    env.grid[0][0].has_pit = False
-    env.grid[0][0].has_wumpus = False
-    agent = Agent()
-    vis = Visualizer(env, agent)
-    score = 0
-    step_count = 0
-    game_end = False
-    percepts = env.get_percepts()
     reset_planner()
 
 # Initial setup
@@ -179,17 +168,17 @@ while True:
                 auto_play = False
                 paused = False
                 game_won = False
-                reset_game_preset(map1)
+                reset_game(map1)
             elif map_buttons["map2"].collidepoint(event.pos):
                 auto_play = False
                 paused = False
                 game_won = False
-                reset_game_preset(map2)
+                reset_game(map2)
             elif map_buttons["map3"].collidepoint(event.pos):
                 auto_play = False
                 paused = False
                 game_won = False
-                reset_game_preset(map3)
+                reset_game(map3)
 
 
             for key, rect in control_buttons.items():

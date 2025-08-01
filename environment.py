@@ -84,7 +84,7 @@ class Environment:
 
     @classmethod
     def from_grid(cls, grid_data, size):
-        env = cls(size=size, num_wumpus=0, pit_prob=0, generate_random=False)
+        env = cls(size, num_wumpus=0, pit_prob=0, generate_random=False)
 
         for i in range(size):
             for j in range(size):
