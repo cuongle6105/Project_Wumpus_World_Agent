@@ -291,7 +291,7 @@ while True:
                 game_lose = True
                 game_end = True
                 win_message = "You lose! A Wumpus moved on top of you!"
-        auto_play = False
+        # auto_play = False
        
 
     vis.draw(screen)

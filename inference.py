@@ -51,6 +51,10 @@ class InferenceEngine:
         self.kb.rules = [r for r in self.kb.rules if not r.conclusion.startswith('W')]
     
     def infer(self, query):
+        xpos, ypos = query
+        name = lambda i, j: f"{i}{j}"
+        if f"Safe{name(xpos, ypos)}" in self.kb.facts:
+            return "safe"
         changed = True
         while changed:
             changed = False
