@@ -1,5 +1,5 @@
 import heapq
-from typing import List, Tuple, Set, Optional
+from typing import List, Tuple, Optional
 
 class Planner:
     #Initialization

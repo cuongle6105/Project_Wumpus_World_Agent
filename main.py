@@ -35,6 +35,7 @@ wumpus_count = 2
 pit_ratio = 0.2
 current_setting = "basic"
 action_log = []
+lose_game = False
 
 def draw_button(surface, rect, text, active):
     color = (0, 255, 0) if active else (200, 200, 200)
@@ -86,7 +87,7 @@ def draw_inputs(surface, panel_left):
 
 def reset_game(preset_map=None):
     global env, agent, vis, score, step_count, percepts, game_end, inference_engine
-    global auto_play, paused, game_won, game_lose, game_tie
+    global auto_play, paused, game_won, game_lose, game_tie, lose_game
     inference_engine = InferenceEngine()
     if preset_map is None: 
         env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
@@ -105,6 +106,7 @@ def reset_game(preset_map=None):
     game_won = False
     game_lose = False
     game_tie = False
+    lose_game = False
     reset_planner()
 
 # Initial setup
@@ -320,7 +322,9 @@ while True:
             print(f"Action log: {action_log}")
             screen.blit(win_surf, (panel_left + 10, 460))
         elif game_lose:
-            score -= 1000
+            if lose_game:
+                score -= 1000
+                lose_game = True
             lose_surf = small_font.render("You lose!", True, (255, 0, 0))
             print(f"Action log: {action_log}")
             screen.blit(lose_surf, (panel_left + 10, 460))
