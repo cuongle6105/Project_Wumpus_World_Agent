@@ -25,12 +25,16 @@ class Planner:
             if 0 <= nx < self.env_size and 0 <= ny < self.env_size:
                 neighbors.append((nx, ny))
         return neighbors
+    
 
     # Check is a position is safe to move to    
     def is_safe(self, pos, inference, env):
         if not (0 <= pos[0] < env.size and 0 <= pos[1] < env.size):
             return False
-
+        # print(f"Checking safety of position {pos} with inference {inference.infer(pos)}")
+        if inference.infer(pos) == 'safe':
+            return True
+        return False
         if inference.infer(pos) == 'unsafe':
             return False
 
@@ -79,15 +83,17 @@ class Planner:
     
     # Returns the position of the closest safe and unvisited tile
     def get_target(self, pos, inference, env) -> Optional[Tuple[int, int]]:
+        # print("Get target")
         target = []
         for x in range(self.env_size):
             for y in range(self.env_size):
                 p = (x, y)
-                if p not in self.visited and self.is_safe(p, inference, env):
+                if p not in self.visited and self.is_safe(p, inference, env) and any(n in self.visited for n in self.get_neighbors(p)):
                     dist = abs(pos[0] - x) + abs(pos[1] - y)
                     target.append((dist, p))
         if target:
             target.sort()
+            # print(f"Target found: {target[0][1]}")
             return target[0][1]
         return None
     
@@ -109,15 +115,17 @@ class Planner:
     
     # Returns the position of the closest uncertain and unvisited tile
     def get_uncertain_target(self, pos, inference) -> Optional[Tuple[int, int]]:
+        # print("Get uncertain target")
         target = []
         for x in range(self.env_size):
             for y in range(self.env_size):
                 p = (x, y)
-                if p not in self.visited and self.is_uncertain(p, inference):
+                if p not in self.visited and self.is_uncertain(p, inference) and any(n in self.visited for n in self.get_neighbors(p)):
                     dist = abs(pos[0] - x) + abs(pos[1] - y)
                     target.append((dist, p))
         if target:
             target.sort()
+            # print(f"Uncertain target found: {target[0][1]}")
             return target[0][1]
         return None
     
@@ -212,7 +220,9 @@ class Planner:
         # Find a safe new location to move to next
         target = (0, 0) if self.returning else self.get_target(pos, inference, env)
         if target:
+            print(f"Target found: {target}")
             path = self.dijkstra(pos, target, inference, env)
+            print(f"Path to target: {path}")
             if path and len(path) >= 2:
                 next_pos = path[1]
                 dx = next_pos[0] - pos[0]
@@ -227,7 +237,9 @@ class Planner:
         # Find a uncertain new location to move to next
         uncertain_target = self.get_uncertain_target(pos, inference)
         if uncertain_target:
+            print(f"Uncertain target found: {uncertain_target}")
             path = self.dijkstra(pos, uncertain_target, inference, env)
+            print(f"Path to uncertain target: {path}")
             if path and len(path) >= 2:
                 self.visited.add(uncertain_target)
                 next_pos = path[1]
