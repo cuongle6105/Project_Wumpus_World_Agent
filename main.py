@@ -249,7 +249,7 @@ while True:
         elif (current_setting == "advanced"):
             make_next_action(agent, inference_engine, env, actions, action_log)
         elif (current_setting == "random"):
-            make_random_action(agent, inference_engine, env, actions, action_log)
+            make_random_action(agent, env, actions, action_log)
         
         for action in actions:
             

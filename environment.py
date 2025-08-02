@@ -134,7 +134,7 @@ class Environment:
     
     @classmethod
     def read_map_from_file(cls, grid_data, size):
-        env = cls(size, num_wumpus=0, pit_prob=0, generate_random=False)
+        env = cls(size=size, num_wumpus=0, pit_prob=0, generate_random=False)
 
         for i in range(size):
             for j in range(size):
@@ -143,16 +143,12 @@ class Environment:
                     env.grid[i][j].has_pit = True
                 if "W" in contents:
                     env.grid[i][j].has_wumpus = True
+                    env.wumpus_positions.append([i, j])
                 if "G" in contents:
                     env.grid[i][j].has_gold = True
                     env.grid[i][j].glitter = True
 
-        for i in range(size):
-            for j in range(size):
-                if env.grid[i][j].has_pit:
-                    for ni, nj in env.adjacent(i, j):
-                        env.grid[ni][nj].breeze = True
-                if env.grid[i][j].has_wumpus:
-                    for ni, nj in env.adjacent(i, j):
-                        env.grid[ni][nj].stench = True
+        env.update_percepts()
+        env.remaining_wumpuses = len(env.wumpus_positions)
+
         return env
