@@ -89,7 +89,7 @@ def reset_game(preset_map=None):
     if preset_map is None: 
         env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
     else:
-        env = Environment.from_grid(preset_map["grid"], preset_map["size"])
+        env = Environment.read_map_from_file(preset_map["grid"], preset_map["size"])
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
     agent = Agent()

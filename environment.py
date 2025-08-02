@@ -128,3 +128,28 @@ class Environment:
             if 0 <= ni < self.size and 0 <= nj < self.size:
                 result.append((ni, nj))
         return result
+    
+    @classmethod
+    def read_map_from_file(cls, grid_data, size):
+        env = cls(size, num_wumpus=0, pit_prob=0, generate_random=False)
+
+        for i in range(size):
+            for j in range(size):
+                contents = grid_data[size - 1 - i][j]
+                if "P" in contents:
+                    env.grid[i][j].has_pit = True
+                if "W" in contents:
+                    env.grid[i][j].has_wumpus = True
+                if "G" in contents:
+                    env.grid[i][j].has_gold = True
+                    env.grid[i][j].glitter = True
+
+        for i in range(size):
+            for j in range(size):
+                if env.grid[i][j].has_pit:
+                    for ni, nj in env.adjacent(i, j):
+                        env.grid[ni][nj].breeze = True
+                if env.grid[i][j].has_wumpus:
+                    for ni, nj in env.adjacent(i, j):
+                        env.grid[ni][nj].stench = True
+        return env
