@@ -31,7 +31,7 @@ class Planner:
     def is_safe(self, pos, inference, env):
         if not (0 <= pos[0] < env.size and 0 <= pos[1] < env.size):
             return False
-        # print(f"Checking safety of position {pos} with inference {inference.infer(pos)}")
+        print(f"Checking safety of position {pos} with inference {inference.infer(pos)}")
         if inference.infer(pos) == 'safe':
             return True
         return False
@@ -54,6 +54,7 @@ class Planner:
 
         while pq:
             cost, current = heapq.heappop(pq)
+            print(f"Visiting {current} with cost {cost}")
             if current in visited:
                 continue
             visited.add(current)
@@ -67,6 +68,12 @@ class Planner:
                 return path[::-1]
 
             for neighbor in self.get_neighbors(current):
+                print(f"Checking neighbor {neighbor}")
+                if neighbor in visited:
+                    print(f"Neighbor {neighbor} already visited")
+                if not self.is_safe(neighbor, inference, env):
+                    print(f"Neighbor {neighbor} is not safe")
+                    
                 if neighbor in visited or not self.is_safe(neighbor, inference, env):
                     continue
                 
@@ -75,7 +82,9 @@ class Planner:
                     extra = 10
 
                 new_cost = cost + extra
+                print(f"New cost to {neighbor}: {new_cost} (previous: {dist.get(neighbor, float('inf'))})")
                 if neighbor not in dist or new_cost < dist[neighbor]:
+                    print(f"Updating neighbor {neighbor} with new cost {new_cost}")
                     dist[neighbor] = new_cost
                     prev[neighbor] = current
                     heapq.heappush(pq, (new_cost, neighbor))

@@ -267,6 +267,7 @@ while True:
                 break
         
         print("Arrows left:", agent.arrows)
+        print(f"cell(0, 0) is " + inference_engine.infer((0, 0)))
         for di, dj in env.adjacent(env.agent_pos[0], env.agent_pos[1]):
             print(f"cell({di}, {dj}) is " + inference_engine.infer((di, dj)))
         inference_engine.kb.show()
