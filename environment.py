@@ -16,7 +16,7 @@ class Cell:
         self.glitter = False
 
 class Environment:
-    def __init__(self, size=8, num_wumpus=2, pit_prob=0.2):
+    def __init__(self, size=8, num_wumpus=2, pit_prob=0.2, generate_random=True):
         self.size = size
         self.grid = [[Cell() for _ in range(size)] for _ in range(size)]
         self.agent_pos = [0, 0]
@@ -24,11 +24,14 @@ class Environment:
         self.num_wumpus = num_wumpus
         self.pit_prob = pit_prob
         self.wumpus_positions = []
-        self.place_pits()
-        self.place_wumpuses()
-        self.place_gold()
-        self.update_percepts()
-        self.remaining_wumpuses = self.num_wumpus  # Track remaining Wumpuses
+        self.remaining_wumpuses = self.num_wumpus
+        
+        if generate_random:
+            self.place_pits()
+            self.place_wumpuses()
+            self.place_gold()
+            self.update_percepts()
+            
 
     def update_percepts(self):
         # """ Recalculates all stenches and breezes on the map. """

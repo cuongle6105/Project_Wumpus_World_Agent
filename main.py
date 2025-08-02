@@ -6,7 +6,9 @@ from visualizer import Visualizer
 from inference import InferenceEngine
 from planning import make_next_action, reset_planner
 from advanced_planning import make_advanced_action, make_random_action
-from testcases import map1, map2, map3
+from testcases.map1 import map1
+from testcases.map2 import map2
+from testcases.map3 import map3
 
 pygame.init()
 font = pygame.font.SysFont("Arial", 18)
@@ -122,7 +124,6 @@ while True:
     panel_left = CELL_SIZE * map_size
     WINDOW_WIDTH = panel_left + PANEL_WIDTH
     WINDOW_HEIGHT = max(CELL_SIZE * map_size, 600)
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     screen.fill((255, 255, 255))
 
     # Update button and input positions
@@ -316,16 +317,16 @@ while True:
     if game_end:
         if game_won:
             win_surf = small_font.render("You win! Agent escaped with gold!", True, (0, 200, 100))
-            #print(f"Action log: {action_log}")
+            print(f"Action log: {action_log}")
             screen.blit(win_surf, (panel_left + 10, 460))
         elif game_lose:
             score -= 1000
             lose_surf = small_font.render("You lose!", True, (255, 0, 0))
-            #print(f"Action log: {action_log}")
+            print(f"Action log: {action_log}")
             screen.blit(lose_surf, (panel_left + 10, 460))
         elif game_tie:
             win_surf = small_font.render("Agent escaped without gold!", True, (0, 0, 0))
-            #print(f"Action log: {action_log}")
+            print(f"Action log: {action_log}")
             screen.blit(win_surf, (panel_left + 10, 460))
 
     if error_message:
