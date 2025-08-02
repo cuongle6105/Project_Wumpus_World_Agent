@@ -246,7 +246,7 @@ while True:
         if (current_setting == "basic"):
             make_next_action(agent, inference_engine, env, actions, action_log)
         elif (current_setting == "advanced"):
-            make_advanced_action(agent, inference_engine, env, actions, action_log)
+            make_next_action(agent, inference_engine, env, actions, action_log)
         elif (current_setting == "random"):
             make_random_action(agent, inference_engine, env, actions, action_log)
         
@@ -278,6 +278,19 @@ while True:
            game_lose = True
            auto_play = False
            paused = True
+
+        if current_setting == "advanced" and step_count > 0 and step_count % 5 == 0:
+            print(f"--- Wumpuses are moving (end of step {step_count}) ---")
+            env.move_wumpuses()
+            
+            inference_engine.reset_wumpus_knowledge()  # Agent's knowledge of Wumpus locations is now outdated
+            # Check if a Wumpus moved into the agent's cell
+            x, y = agent.position
+            if env.grid[x][y].has_wumpus:
+                game_lose = True
+                game_end = True
+                win_message = "You lose! A Wumpus moved on top of you!"
+       
 
     vis.draw(screen)
     pygame.draw.rect(screen, (200, 200, 200), (panel_left, 0, PANEL_WIDTH, WINDOW_HEIGHT))

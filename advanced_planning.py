@@ -3,7 +3,7 @@ from environment import DIRECTIONS
 import heapq
 import random
 
-def make_random_action(agent, env, actions):
+def make_random_action(agent, env, actions, action_log):
     possible_actions = ["FORWARD", "TURN_LEFT", "TURN_RIGHT", "GRAB", "CLIMB"]
     
     # Only allow "SHOOT" if the agent has arrows
@@ -12,6 +12,7 @@ def make_random_action(agent, env, actions):
 
     action = random.choice(possible_actions)
     actions.append(action)
+    action_log.append(action)
 
     # Optional: update agent or environment based on action
     if action == "FORWARD":
@@ -31,7 +32,7 @@ def make_random_action(agent, env, actions):
         agent.arrows -= 1
 
 
-def make_advanced_action(agent, inference, env, actions):
+def make_advanced_action(agent, inference, env, actions, action_log):
     x, y = agent.position
     # dir_map = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
     dir_map = {(0, 1): "N", (1, 0): "E", (0, -1): "S", (-1, 0): "W"}
@@ -114,6 +115,7 @@ def make_advanced_action(agent, inference, env, actions):
     # 1. If agent perceives gold (glitter), grab it
     if 'G' in env.get_percepts() and not agent.has_gold:
         actions.append("GRAB")
+        action_log.append("GRAB")
         agent.has_gold = True
         env.grid[x][y].has_gold = False
         env.grid[x][y].glitter = False
@@ -123,6 +125,7 @@ def make_advanced_action(agent, inference, env, actions):
     if agent.has_gold:
         if agent.position == [0, 0]:
             actions.append("CLIMB")
+            action_log.append("CLIMB")
             return
         path = run_dijkstra(lambda i, j: [i, j] == [0, 0])
 
@@ -143,6 +146,7 @@ def make_advanced_action(agent, inference, env, actions):
     # 6. If no path is found, agent does nothing
     if not path:
         actions.append("NO_OP")
+        action_log.append("NO_OP")
         return
 
     # Move toward first step in path
@@ -157,13 +161,16 @@ def make_advanced_action(agent, inference, env, actions):
         if diff == 1:
             agent.turn_right()
             actions.append("TURN_RIGHT")
+            action_log.append("TURN_RIGHT")
         elif diff == 3:
             agent.turn_left()
             actions.append("TURN_LEFT")
+            action_log.append("TURN_LEFT")
         elif diff == 2:
             agent.turn_right()
             agent.turn_right()
             actions.extend(["TURN_RIGHT", "TURN_RIGHT"])
+            action_log.extend(["TURN_RIGHT", "TURN_RIGHT"])
         return  # Only turn this step
 
     # Move forward
@@ -171,5 +178,7 @@ def make_advanced_action(agent, inference, env, actions):
         new_x, new_y = agent.position
         env.grid[new_x][new_y].visited = True
         actions.append("FORWARD")
+        action_log.append("FORWARD")
     else:
         actions.append("NO_OP")
+        action_log.append("NO_OP")
