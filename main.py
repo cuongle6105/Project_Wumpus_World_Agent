@@ -85,14 +85,60 @@ def draw_inputs(surface, panel_left):
         text = font.render(input_texts[key], True, (0, 0, 0))
         surface.blit(text, (input_boxes[key].x + 5, input_boxes[key].y + 5))
 
-def reset_game(preset_map=None):
+# def reset_game(preset_map=None):
+#     global env, agent, vis, score, step_count, percepts, game_end, inference_engine
+#     global auto_play, paused, game_won, game_lose, game_tie, lose_game
+#     inference_engine = InferenceEngine()
+#     if preset_map is None: 
+#         env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
+#     else:
+#         env = Environment.read_map_from_file(preset_map["grid"], preset_map["size"])
+#     env.grid[0][0].has_pit = False
+#     env.grid[0][0].has_wumpus = False
+#     agent = Agent()
+#     vis = Visualizer(env, agent)
+#     score = 0
+#     step_count = 0
+#     game_end = False
+#     percepts = env.get_percepts()
+#     auto_play = False
+#     paused = False
+#     game_won = False
+#     game_lose = False
+#     game_tie = False
+#     lose_game = False
+#     reset_planner()
+    
+initial_map_data = None
+
+def reset_game(preset_map=None, use_saved=False):
     global env, agent, vis, score, step_count, percepts, game_end, inference_engine
     global auto_play, paused, game_won, game_lose, game_tie, lose_game
+    global initial_map_data
+
     inference_engine = InferenceEngine()
-    if preset_map is None: 
-        env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
-    else:
+
+    if use_saved and initial_map_data:
+        env = Environment.read_map_from_file(initial_map_data["grid"], initial_map_data["size"])
+    elif preset_map is not None:
         env = Environment.read_map_from_file(preset_map["grid"], preset_map["size"])
+        initial_map_data = {
+            "grid": [row.copy() for row in preset_map["grid"]],
+            "size": preset_map["size"]
+        }
+    else:
+        env = Environment(size=map_size, num_wumpus=wumpus_count, pit_prob=pit_ratio)
+        # Save current random map
+        initial_map_data = {
+            "grid": [[
+                ("P" if cell.has_pit else "") +
+                ("W" if cell.has_wumpus else "") +
+                ("G" if cell.has_gold else "")
+                for cell in row
+            ] for row in env.grid[::-1]],  # Flip Y-axis like in read_map_from_file
+            "size": env.size
+        }
+
     env.grid[0][0].has_pit = False
     env.grid[0][0].has_wumpus = False
     agent = Agent()
@@ -108,6 +154,7 @@ def reset_game(preset_map=None):
     game_tie = False
     lose_game = False
     reset_planner()
+
 
 # Initial setup
 auto_play = False
@@ -222,7 +269,7 @@ while True:
                         auto_play = False
                         paused = False
                         game_won = False
-                        reset_game()
+                        reset_game(use_saved=True)
 
         elif event.type == pygame.KEYDOWN and active_input:
             if event.key == pygame.K_BACKSPACE:
